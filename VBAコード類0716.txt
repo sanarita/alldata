@@ -1,0 +1,536 @@
+WorksheetFunction.Subtotal関数
+================================================
+Application.WorksheetFunction.Subtotal(3, Range("A:A"))
+'引数1平均、2データ個数、3データ個数(空白除く)、4最大値 5最小値 6積を求める 7標本から標準偏差 8母集団から標準偏差
+’9合計を求める　10標本から分散を求める 11母集団から分散を求める
+
+
+
+マクロを置換するマクロ
+================================================
+Sub Sample3()
+    Dim Target As Workbook, buf As String, VBC, i As Long
+    Const Path As String = "C:\Tmp\"
+    buf = Dir(Path & "*.xls")
+    Do While buf <> ""
+        Set Target = Workbooks.Open(Path & buf)
+        With Target.VBProject.VBComponents("Module1").CodeModule
+            For i = 1 To .CountOfLines
+                If .Lines(i, 1) = "    Const StartDay As Date = #4/1/2006#" Then
+                    .ReplaceLine i, "    Const StartDay As Date = #9/1/2007#"
+                End If
+            Next i
+        End With
+        Target.Save
+        Target.Close
+        buf = Dir()
+    Loop
+End Sub
+
+
+使用されているセルを選択
+================================================
+ActiveSheet.UsedRange.Select
+
+
+セルが選択されているか判別
+================================================
+Sub セルが選択されているか判別()
+
+If TypeName(Selection) = "Range" Then
+msgbox "選択セル範囲："& Selection.Address
+
+Else
+msgbox "セルが選択されていません"
+
+End If
+
+End Sub
+
+
+
+重複データを削除する
+================================================
+Range("A1").currentRegion.RemoveDuplicates Columns:1,Header:=xlYes
+
+Columns:1　→　どこの列を参照して重複したデータを削除するか
+Header:=xlYes →　一行目が見出しかどうか？
+
+PC情報記録
+================================================
+Sub 記録()’PC情報
+Dim WNO　As Object, row As Long
+　Set WNO = CreateObject("WScript.Network")
+　With Sheet("スパイ")
+　　　row = .Range("A" & Rows.Count).End(xlUp).row + 1
+      .Cells(row,1) = WNO.UserName
+      .Cells(row,2) = WNO.ComputerName
+      .Cells(row,3) = WNO.UserDomain
+      .Cells(row,4) = Now
+End With
+
+End Sub
+
+他シートのセル選択する　
+================================================
+
+※複雑処理の際にエラーが出る可能性あり
+DoEvents
+Application.ScreenUpdating = True
+
+Application.Goto Worksheets("テスト").Range("A1"), True
+’↑Trueなら、セルが左上に来る、Falseなら、選択セルは移動してきた方向に依存
+
+Application.ScreenUpdating = False
+
+
+単語練習VBA
+================================================
+https://sunagitsune.com/excelvbaenglishlearning/
+' vba
+Option Explicit
+Public question
+Public point
+Public i
+
+Sub 出題()
+Application.Calculate
+If Worksheets("単語").Range("F2").Value = 0 Then
+Beep
+MsgBox ("全ての問題が完了しています")
+Else
+Range("B2").Font.ColorIndex = 2
+End If
+End Sub
+
+Sub OK()
+Range("B2").Font.ColorIndex = 3
+Set question = Worksheets("単語").Range("B:B"). _
+Find(Worksheets("テスト").Range("A2").Value)
+Set point = Sheets("単語").Cells(question.Row, 4)
+If point.Value < 10 Then
+point.Value = point.Value + 1
+End If
+End Sub
+
+Sub 確認()
+Range("B2").Font.ColorIndex = 3
+End Sub
+
+Sub 整理()
+Worksheets("単語").Range("B2:D10000").Sort Worksheets("単語").Range("D2")
+End Sub
+
+Sub クリア()
+Dim clearnumber
+Set clearnumber = Worksheets("単語").Range("F5")
+For i = 2 To clearnumber + 1
+Sheets("単語").Cells(i, 4).Value = 0
+Next
+End Sub
+
+Sub 計算方法手動()
+Application.Calculation = xlCalculationManual
+End Sub
+
+Sub 計算方法自動()
+Application.Calculation = xlCalculationAutomatic
+End Sub
+
+
+ExcelからAccess起動
+================================================
+
+Sub test_001()
+
+  Dim objACCESS As Object
+
+  'ExcelからAccess起動
+    'Accessのアプリケーションオブジェクトを作成する
+
+    Set objACCESS = CreateObject("Access.Application")
+    objACCESS.Visible = True     'Accessを表示ＯＮあたりまえか
+    objACCESS.UserControl = True 'Excelで操作するんだけど、ユーザーのTrueにしておく
+  'AccessのMDBを開く
+    'もちろん、次はファイルを開かないとね ファイル名 フルパスを渡す
+    objACCESS.OpenCurrentDatabase ActiveWorkbook.Path & "\売上管理.accdb"
+
+  '指定したフォームを開き、ユーザー名とパスワードのセット(Access側)
+    ' 指定のフォームを開く、ここでは、MENU_Login で ログインの画面を開く
+    objACCESS.DoCmd.OpenForm "Fメインメニュー", 0 'acNormal=0 フォームの名前を指定して開く
+    SendKeys "~"
+    'プライベートのログインボタンの関数 が コールできなかったので、
+   
+   
+   
+    objACCESS.Forms("Fメインメニュー")![請求書の印刷ボタン].SetFocus 'フォーカス セット後
+    objACCESS.Forms("Fメインメニュー")![請求書の印刷ボタン].SetFocus
+    DoEvents
+    Application.Wait Time:=Now + TimeValue("00:00:02")
+    SendKeys "{Enter}"
+   
+   
+   
+    SendKeys "~" '苦肉の策でリターンキーを送る
+
+    '↑でフォームが表示されるまでを待ちたかったので、３秒待ってみました。
+
+   
+   
+   SendKeys "{Enter}"
+       
+         
+         
+         Set objACCESS = Nothing  ' オブジェクト開放、もう私Excelから使用しないから
+
+End Sub
+
+
+
+OutlookとAccessの連携
+================================================
+Private Sub コマンド7_Click()
+
+'コード1｜このコード内で使用する変数を宣言
+Dim InboxFolder, subfolder, i, n, k, attno As Long
+Dim sender, mes, path1 As String
+Dim outlookObj As Outlook.Application
+Dim myNameSpace, objmailItem As Object
+Dim fso As FileSystemObject
+
+'コード2｜定義した変数に必要な項目をセット
+Set outlookObj = CreateObject("Outlook.Application")
+Set myNameSpace = outlookObj.GetNamespace("MAPI")
+Set InboxFolder = myNameSpace.GetDefaultFolder(6)
+n = 2
+
+Dim cnn As ADODB.Connection
+Dim rs As ADODB.Recordset
+
+Dim cnn1 As ADODB.Connection
+
+Set cnn = CurrentProject.Connection
+Set rs = New ADODB.Recordset
+
+Set cnn1 = CurrentProject.Connection
+
+Set subfolder = InboxFolder.Folders("一時保存")
+
+rs.Open "受信メール", cnn, adOpenKeyset, adLockOptimistic
+
+'コード4｜解析する受信メールの範囲を決める
+'MsgBox subfolder.Items.Count
+For i = 1 To subfolder.Items.Count
+Set objmailItem = subfolder.Items(i)
+
+'コード5｜受信メールの件数、受信日時、件名(タイトル)、送信者名、送信元のメールアドレス、内容(本文)を取得
+rs.AddNew
+rs!受信日時 = objmailItem.ReceivedTime
+rs!件名 = Left(objmailItem.Subject, 25)
+rs!相手 = objmailItem.SenderName
+rs!送信元アドレス = objmailItem.SenderEmailAddress
+rs!本文 = Left(objmailItem.Body, 200)
+
+rs.Update
+Next i
+
+cnn1.Close
+Set cnn1 = Nothing
+
+rs.Close
+Set rs = Nothing
+cnn.Close
+Set cnn = Nothing
+
+'コード7｜セットした変数を解除
+Set outlookObj = Nothing
+Set myNameSpace = Nothing
+
+MsgBox subfolder.Items.Count & "件のメールを保存しました"
+
+Set subfolder = Nothing
+End Sub
+
+
+
+ファイル移動VBA
+================================================
+Sub ファイル移動()
+Dim fso As FileSystemObject
+Set fso = New FileSystemObject
+Dim day As String
+day = Format(Date, "mmdd")
+Dim IN_DIR As String
+IN_DIR = "C:\Users\wanco2\Desktop\" & "メール送信" & day & "\"     'msgフォルダ
+
+
+Call fso.MoveFile("C:\Users\wanco2\Desktop\" & "メール送信" & day & "\" & "*.msg", "C:\Users\wanco2\Desktop\" & "メール送信済み" & day & "\") ' 複数のファイルをまとめて移動
+' Call fso.MoveFile("C:\Users\wanco2\Desktop\*", "D:\TipsFolder\")         ' 全てのファイルをまとめて移動
+
+' 後始末
+Set fso = Nothing
+End Sub
+
+
+
+
+================================================
+Option Explicit
+Private Declare Sub sleep Lib "kernel32" Alias "Sleep" (ByVal ms As Long)
+Sub sakura_yugure()
+    Dim y_Rnd1, x_Rnd1, n, i, k, s, ss As Long, i1, i2, i3, i4, ss2 As Variant: Dim cs, si, si2 As Variant
+    Dim Sha, Sha1, Sha2, Sha3, Sha4, Sha5, WshShell As Object: Application.ExecuteExcel4Macro "SHOW.TOOLBAR(""Ribbon"",False)"
+    On Error Resume Next
+    Sheets.Add.Name = "スクリーンセーバ": Range("A1:AI46").Merge: Application.GoTo Cells(2, 1)
+    With ActiveWindow: Application.DisplayScrollBars = False: .DisplayHeadings = False: .DisplayWorkbookTabs = False: Application.DisplayFormulaBar = False: Application.DisplayStatusBar = False: End With
+    With ActiveSheet: .Cells(1, 1).Interior.color = RGB(233, 245, 255)
+    Application.EnableCancelKey = xlErrorHandler: On Error GoTo handleError
+
+ For n = 1 To 15
+   For k = 1 To 240
+     
+    Randomize: y_Rnd1 = Int((1340 * Rnd) + 30): x_Rnd1 = Int((300 * Rnd) + 20): sleep 20
+         Call color(i1, i2, i3, i4)
+    Set Sha = .Shapes.AddShape(msoShapeHeart, y_Rnd1, x_Rnd1, 22, 36): Sha.Fill.OneColorGradient msoGradientHorizontal, 2, 1
+         Sha.Fill.GradientStops.Insert RGB(255, 110, 110), 0: Sha.Fill.GradientStops.Insert RGB(255, i1, i2), 0.3: Sha.Fill.GradientStops.Insert RGB(255, i3, i4), 0.6
+         Sha.Line.ForeColor.RGB = RGB(255, 230, 230)
+    Set Sha1 = .Shapes.AddShape(msoShapeHeart, y_Rnd1 + 16, x_Rnd1 + 13, 22, 36): Sha1.Fill.OneColorGradient msoGradientHorizontal, 2, 1
+         Sha1.Fill.GradientStops.Insert RGB(255, 110, 110), 0: Sha1.Fill.GradientStops.Insert RGB(255, i1, i2), 0.3: Sha1.Fill.GradientStops.Insert RGB(255, i3, i4), 0.6
+         Sha1.Line.ForeColor.RGB = RGB(255, 230, 230): Sha1.Rotation = 72
+    Set Sha2 = .Shapes.AddShape(msoShapeHeart, y_Rnd1 + 10, x_Rnd1 + 32, 22, 36): Sha2.Fill.OneColorGradient msoGradientHorizontal, 2, 1
+         Sha2.Fill.GradientStops.Insert RGB(255, 110, 110), 0: Sha2.Fill.GradientStops.Insert RGB(255, i1, i2), 0.3: Sha2.Fill.GradientStops.Insert RGB(255, i3, i4), 0.6
+         Sha2.Line.ForeColor.RGB = RGB(255, 230, 230): Sha2.Rotation = 144
+    Set Sha3 = .Shapes.AddShape(msoShapeHeart, y_Rnd1 - 10, x_Rnd1 + 32, 22, 36): Sha3.Fill.OneColorGradient msoGradientHorizontal, 2, 1
+         Sha3.Fill.GradientStops.Insert RGB(255, 110, 110), 0: Sha3.Fill.GradientStops.Insert RGB(255, i1, i2), 0.3: Sha3.Fill.GradientStops.Insert RGB(255, i3, i4), 0.6
+         Sha3.Line.ForeColor.RGB = RGB(255, 230, 230): Sha3.Rotation = 216
+    Set Sha4 = .Shapes.AddShape(msoShapeHeart, y_Rnd1 - 16, x_Rnd1 + 13, 22, 36): Sha4.Fill.OneColorGradient msoGradientHorizontal, 2, 1
+         Sha4.Fill.GradientStops.Insert RGB(255, 110, 110), 0: Sha4.Fill.GradientStops.Insert RGB(255, i1, i2), 0.3: Sha4.Fill.GradientStops.Insert RGB(255, i3, i4), 0.6
+         Sha4.Line.ForeColor.RGB = RGB(255, 230, 230): Sha4.Rotation = 288
+    Set Sha5 = .Shapes.AddShape(msoShape5pointStar, y_Rnd1 + 8, x_Rnd1 + 32, 7, 7): Sha5.Fill.ForeColor.RGB = RGB(255, 170, 0): Sha5.Line.ForeColor.RGB = RGB(255, 255, 210)
+         Sha5.Rotation = 28: Sha5.Name = "hoshi_" & Sha5.Name: Application.Wait [Now()] + 10 / 86400000: Next k
+
+ss = 1: ss2 = ActiveSheet.Shapes.Count
+    cs = chiru(ss, ss2)
+   With Range("A1").Interior
+    .Pattern = xlPatternLinearGradient
+    .Gradient.ColorStops.Clear
+    .Gradient.Degree = 70
+    .Gradient.ColorStops.Add(0).color = RGB(203, 129, 120): .Gradient.ColorStops.Add(1).color = RGB(228, 155, 31)
+    Application.Wait [Now()] + 3000 / 86400000
+    cs = chiru(ss, ss2)
+    .Gradient.ColorStops.Add(0).color = RGB(226, 56, 0)
+    .Gradient.ColorStops.Add(1).color = RGB(252, 96, 0)
+     Application.Wait [Now()] + 3000 / 86400000
+    cs = chiru(ss, ss2)
+    .Gradient.ColorStops.Clear
+    .Gradient.ColorStops.Add(0).color = RGB(208, 38, 12)
+    .Gradient.ColorStops.Add(1).color = RGB(251, 165, 130)
+    Application.Wait [Now()] + 3000 / 86400000
+    cs = chiru(ss, ss2)
+    
+End With
+        Set WshShell = CreateObject("WScript.Shell")
+        WshShell.SendKeys "{NUMLOCK}": Application.Wait [Now()] + 300 / 86400000: WshShell.SendKeys "{NUMLOCK}"
+        Set WshShell = Nothing
+        Set Sha = Nothing: Set Sha1 = Nothing: Set Sha2 = Nothing: Set Sha3 = Nothing: Set Sha4 = Nothing: Set Sha5 = Nothing
+        DoEvents
+        ActiveSheet.Shapes.SelectAll: Selection.Delete
+        ActiveSheet.Cells.Interior.color = RGB(237, 252, 255): Next n
+Debug.Print n
+handleError:
+    Application.DisplayAlerts = False: Sheets("スクリーンセーバ").Delete: Application.DisplayAlerts = True
+    Set Sha = Nothing: Set Sha1 = Nothing: Set Sha2 = Nothing: Set Sha3 = Nothing: Set Sha4 = Nothing: Set Sha5 = Nothing
+    On Error Resume Next
+    ActiveSheet.Cells.Interior.ColorIndex = xlNone: End With
+    Application.DisplayScrollBars = True: Application.StatusBar = False: ActiveWindow.DisplayHeadings = True: ActiveWindow.DisplayHorizontalScrollBar = True
+    Application.DisplayFormulaBar = True: ActiveWindow.DisplayWorkbookTabs = True: Application.DisplayStatusBar = True: Application.ExecuteExcel4Macro "SHOW.TOOLBAR(""Ribbon"",True)"
+    ActiveWindow.DisplayVerticalScrollBar = True
+    Application.Calculation = xlCalculationAutomatic
+End Sub
+Sub color(i1, i2, i3, i4 As Variant)
+
+ Dim flag As Long
+    Randomize
+    flag = Int((11 * Rnd) + 1)
+    Select Case flag
+
+    Case Is = 11
+            i1 = 192: i2 = 193
+            i3 = 234: i4 = 245
+    Case Is = 10
+            i1 = 215: i2 = 228
+            i3 = 223: i4 = 238
+    Case Is = 9
+            i1 = 203: i2 = 213
+            i3 = 238: i4 = 236
+    Case Is = 8
+            i1 = 211: i2 = 220
+            i3 = 224: i4 = 236
+    Case Is = 7
+            i1 = 194: i2 = 200
+            i3 = 234: i4 = 245
+    Case Is = 6
+            i1 = 221: i2 = 225
+            i3 = 218: i4 = 233
+    Case Is = 5
+            i1 = 221: i2 = 215
+            i3 = 235: i4 = 236
+    Case Is = 4
+            i1 = 219: i2 = 225
+            i3 = 235: i4 = 240
+    Case Is = 3
+            i1 = 203: i2 = 218
+            i3 = 235: i4 = 247
+    Case Is = 2
+            i1 = 218: i2 = 224
+            i3 = 230: i4 = 239
+    Case Is = 1
+            i1 = 209: i2 = 215
+            i3 = 238: i4 = 245
+        End Select
+End Sub
+
+Function chiru(ss, ss2) As Variant
+    Dim i, m, m3, i23, i32, i33 As Long, AZ, AZ1, m2 As Variant: m3 = 2: AZ = Array("272", "97", "270", "95", "88", "269", "108", "265", "268", "91", "90")
+    Dim WshShell As Object
+    
+    For i = 1 To 60
+    
+    Randomize: AZ1 = Int((UBound(AZ) * Rnd))
+            If ActiveSheet.Shapes(ss).Top > 500 Then
+                ss = ss + 1
+            ElseIf ActiveSheet.Shapes(ss2).Top > 500 Then
+                ss2 = ss2 - 1: End If
+            
+            If ActiveSheet.Shapes(ss).Name Like "hoshi_*" Then
+                ActiveSheet.Shapes(ss).Delete: Set WshShell = CreateObject("WScript.Shell"): WshShell.SendKeys "{NUMLOCK}": WshShell.SendKeys "{NUMLOCK}": Set WshShell = Nothing: End If
+            If ActiveSheet.Shapes(ss2).Name Like "hoshi_*" Then
+                ActiveSheet.Shapes(ss2).Delete: ss2 = ss2 - 1:  End If
+            m = Int((5 - 9 * Rnd)): m2 = AZ(AZ1)
+ 
+        Do Until ActiveSheet.Shapes(ss).Top > 705 Or ActiveSheet.Shapes(ss2).Top > 705
+            Application.EnableCancelKey = xlErrorHandler
+            ActiveSheet.Shapes(ss2).Top = ActiveSheet.Shapes(ss2).Top + 3: ActiveSheet.Shapes(ss2).Left = ActiveSheet.Shapes(ss2).Left + m
+            ActiveSheet.Shapes(ss).Top = ActiveSheet.Shapes(ss).Top + 3: ActiveSheet.Shapes(ss).Rotation = m2 - m3: ActiveSheet.Shapes(ss).Left = ActiveSheet.Shapes(ss).Left + m
+            ActiveSheet.Shapes(ss2).Top = ActiveSheet.Shapes(ss2).Top + 3: Application.Wait [Now()] + 1 / 86400000
+            ActiveSheet.Shapes(ss).Top = ActiveSheet.Shapes(ss).Top + 3
+            ActiveSheet.Shapes(ss2).Top = ActiveSheet.Shapes(ss2).Top + 3
+            ActiveSheet.Shapes(ss).Top = ActiveSheet.Shapes(ss).Top + 3: Application.Wait [Now()] + 1 / 86400000
+            ActiveSheet.Shapes(ss).Top = ActiveSheet.Shapes(ss).Top + 2: ActiveSheet.Shapes(ss).Left = ActiveSheet.Shapes(ss).Left + m
+            ActiveSheet.Shapes(ss2).Top = ActiveSheet.Shapes(ss2).Top + 3
+            ActiveSheet.Shapes(ss).Top = ActiveSheet.Shapes(ss).Top + 3
+            ActiveSheet.Shapes(ss2).Top = ActiveSheet.Shapes(ss2).Top + 3: ActiveSheet.Shapes(ss2).Rotation = m2 + m3
+            ActiveSheet.Shapes(ss).Top = ActiveSheet.Shapes(ss).Top + 3: ActiveSheet.Shapes(ss).Rotation = m2 + m3
+            ActiveSheet.Shapes(ss2).Top = ActiveSheet.Shapes(ss2).Top + 3
+            ActiveSheet.Shapes(ss2).Top = ActiveSheet.Shapes(ss2).Top + 3
+            ActiveSheet.Shapes(ss).Top = ActiveSheet.Shapes(ss).Top + 3: Application.Wait [Now()] + 1 / 86400000
+            ActiveSheet.Shapes(ss2).Top = ActiveSheet.Shapes(ss2).Top + 3: ActiveSheet.Shapes(ss2).Left = ActiveSheet.Shapes(ss2).Left + m: ActiveSheet.Shapes(ss2).Rotation = m2 - m3
+            ActiveSheet.Shapes(ss).Top = ActiveSheet.Shapes(ss).Top + 3: ActiveSheet.Shapes(ss).Left = ActiveSheet.Shapes(ss).Left + m: ActiveSheet.Shapes(ss).Rotation = m2 - m3
+            m3 = Int((-9 + 20 * Rnd))
+         Loop
+         
+'パターン1----------------------------------------------------------------------------------------
+            If ActiveSheet.Shapes(ss).Top > 705 And 710 - ActiveSheet.Shapes(ss2).Top > 40 Then
+              Do Until ActiveSheet.Shapes(ss2).Top > 705
+              Application.Wait [Now()] + 1 / 86400000
+              ActiveSheet.Shapes(ss2).Top = ActiveSheet.Shapes(ss2).Top + 3: ActiveSheet.Shapes(ss2).Rotation = m2 + Int((-9 + 18 * Rnd)): ActiveSheet.Shapes(ss2).Left = ActiveSheet.Shapes(ss2).Left + m + 2
+              ActiveSheet.Shapes(ss2).Top = ActiveSheet.Shapes(ss2).Top + 3
+              ActiveSheet.Shapes(ss2).Top = ActiveSheet.Shapes(ss2).Top + 2: ActiveSheet.Shapes(ss2).Left = ActiveSheet.Shapes(ss2).Left + m - 2
+              Application.Wait [Now()] + 1 / 86400000
+              ActiveSheet.Shapes(ss2).Top = ActiveSheet.Shapes(ss2).Top + 3
+             Loop
+'パターン2----------------------------------------------------------------------------------------
+            ElseIf ActiveSheet.Shapes(ss2).Top > 705 And 710 - ActiveSheet.Shapes(ss).Top > 40 Then
+             Do Until ActiveSheet.Shapes(ss).Top > 710
+             Application.Wait [Now()] + 1 / 86400000
+             ActiveSheet.Shapes(ss).Top = ActiveSheet.Shapes(ss).Top + 3: ActiveSheet.Shapes(ss).Rotation = m2 + Int((-9 + 18 * Rnd)): ActiveSheet.Shapes(ss).Left = ActiveSheet.Shapes(ss).Left + m - 2
+             ActiveSheet.Shapes(ss).Top = ActiveSheet.Shapes(ss).Top + 3
+             Application.Wait [Now()] + 1 / 86400000
+             ActiveSheet.Shapes(ss).Top = ActiveSheet.Shapes(ss).Top + 2: ActiveSheet.Shapes(ss).Left = ActiveSheet.Shapes(ss).Left + m + 2
+             ActiveSheet.Shapes(ss).Top = ActiveSheet.Shapes(ss).Top + 3
+            Loop
+            
+           End If
+           ActiveSheet.Shapes(ss2).ZOrder msoSendToBack
+           ss = ss + 1: ss2 = ss2 - 1
+           
+   Next i
+    Application.Wait [Now()] + 20 / 86400000
+    
+    chiru = Array(ss, ss2)
+
+End Function
+
+Sub cu()
+Dim s As Object, i As Long
+i = 1
+For Each s In ActiveSheet.Shapes
+Sheets("sheet1").Cells(i, 1).Value = ActiveSheet.Shapes(i).Name
+i = i + 1
+Next s
+
+End Sub
+
+
+
+
+
+================================================
+Option Explicit
+Sub 線グラディーション()
+With Range("B2:C4").Interior
+.Pattern = xlPatternLinearGradient
+.Gradient.ColorStops.Clear
+.Gradient.Degree = 70
+.Gradient.ColorStops.Add(0).color = RGB(196, 29, 33)
+.Gradient.ColorStops.Add(1).color = RGB(236, 169, 110)
+.Gradient.ColorStops.Add(0).color = RGB(208, 38, 12)
+.Gradient.ColorStops.Add(1).color = RGB(251, 165, 130)
+
+End With
+End Sub
+
+
+' With Range("A1").Interior
+'    .Pattern = xlPatternLinearGradient
+'    With .Gradient
+'    .Degree = 50
+'    With .ColorStops
+'    .Clear
+'    .Add(0).color = RGB(203, 99, 90): .Add(1).color = RGB(236, 169, 110)
+'    cs = chiru(ss, ss2)
+'    Application.Wait [Now()] + 3000 / 86400000
+'    .Add(0).color = RGB(203, 129, 120): .Add(1).color = RGB(211, 120, 110)
+'    Application.Wait [Now()] + 3000 / 86400000
+'    cs = chiru(ss, ss2)
+'    sleep 3000
+'    .Clear
+'    .Add(0).color = RGB(120, 51, 80): .Add(1).color = RGB(236, 129, 110)
+'    cs = chiru(ss, ss2)
+'    Application.Wait [Now()] + 5000 / 86400000
+'    .Add(0).color = RGB(174, 84, 82): .Add(1).color = RGB(196, 104, 65)
+'    cs = chiru(ss, ss2)
+'
+'     End With
+'   End With
+'End With
+
+
+
+
+Sub 色分解()
+Dim myColor As ColorStop
+Dim i As Integer
+
+With Range("B2")
+For Each myColor In .Interior.Gradient.ColorStops
+i = i + 1
+.Offset(, i).Interior.color = myColor.color
+Next
+End With
+End Sub
+
+
+
+
+================================================
