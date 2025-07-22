@@ -1,0 +1,47 @@
+function highlightCells() {
+  // アクティブなスプレッドシートを取得
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var seireki = new Date().getFullYear();
+  let month = new Date().getMonth()+1; //月
+  let month2 = new Date().getMonth()+2; //月
+  let month3 = new Date().getMonth()-1; //月
+  let month0 = new Date().getMonth(); //月
+  let gengou = 'R';
+  let year = seireki - 2018;
+  var keyword2= gengou + year+"."+month2;
+  var keyword3= gengou + year+"."+month3;
+  var keyword4= gengou + year+"."+month0;
+  var keyword5= month3;
+  var keyword = gengou + year+"."+month; // 色を変えたいキーワードをここに入力します
+
+
+  // シート全体の範囲を取得
+  var range = sheet.getDataRange();
+  // 範囲内の全データを取得
+  var values = range.getValues();
+  
+  // 範囲内のセルを1つずつチェック
+  for (var i = 0; i < values.length; i++) {
+      let keywordx = sheet.getRange(i+1, 2).getValue()
+      let strSplit = keywordx.substring(3);
+      let strSplit2 = keywordx.substring(1, 2);
+      if (values[i].toString().indexOf(keyword) !== -1) 
+        // 指定された文字を含むセルの背景色を変更
+        sheet.getRange(i+1, 2).setBackground("red").setFontColor("white");
+      else if  (values[i].toString().indexOf(keyword2) !== -1)
+        
+        sheet.getRange(i+1, 2).setFontColor("blue");
+      else if (values[i].toString().indexOf(keyword3) !== -1)
+      sheet.getRange(i+1, 2).setBackground("red").setFontColor("white");
+      else if (values[i].toString().indexOf(keyword4) !== -1)
+      sheet.getRange(i+1, 2).setBackground("red").setFontColor("white");
+      else if (strSplit <= keyword5 && strSplit2 == year)
+      sheet.getRange(i+1, 2).setBackground("red").setFontColor("white");
+        else if (strSplit2 < year)
+      sheet.getRange(i+1, 2).setBackground("red").setFontColor("white");
+      //console.log(sheet.getRange(i+1, 2).getValue());
+      console.log(strSplit <= keyword5);
+      console.log(strSplit2);
+      }
+      
+}
