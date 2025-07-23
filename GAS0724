@@ -1,0 +1,43 @@
+function highlightAd() {
+  let days = new Date();
+  let year = new Date().getFullYear();
+  let month2 = new Date().getMonth()+2; //翌月
+  let month3 = new Date().getMonth()-1; //前々月
+  let month0 = new Date().getMonth(); //前月
+  let month = new Date().getMonth()+1;
+  let keyword2= year +"/0"+ month2;//翌月2025/8
+  let keyword3= year +"/0"+ month3;//前々月2025/5
+  let keyword4= year +"/0"+ month0; // 2025/6
+  let keyword = year +"/0"+ month; // 2025/
+  const now = new Date();
+  const sheetName = Utilities.formatDate(now, Session.getScriptTimeZone(), "yyyyMM");
+  //Logger.log(sheetName);
+  // 更新作業したいシートをアクティブ化
+  SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName).activate();
+  let sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  // シート全体の範囲を取得
+  var range = sheet.getDataRange();
+  // 範囲内の全データを取得
+  var values = range.getDisplayValues();
+  
+  // 範囲内のセルを1つずつチェック
+  for (var i = 0; i < values.length; i++) {
+      let keywordx = sheet.getRange(i+1, 4).getDisplayValue()
+      let strSplit = keywordx.substring(0, 4);
+
+      if (keywordx == keyword) 
+        // 指定された文字を含むセルの背景色を変更
+        sheet.getRange(i+1, 4).setFontColor("red");
+      else if  (keywordx == keyword2)
+        sheet.getRange(i+1, 4).setFontColor("blue");
+      else if (keywordx == keyword3)
+      sheet.getRange(i+1, 4).setBackground("red").setFontColor("white");
+      else if (keywordx == keyword4)
+      sheet.getRange(i+1, 4).setBackground("red").setFontColor("white");
+      else if (keywordx < keyword3)
+      sheet.getRange(i+1, 4).setBackground("red").setFontColor("white");
+      else if (strSplit < year)
+      sheet.getRange(i+1, 4).setBackground("red").setFontColor("white");
+      }
+      
+}
