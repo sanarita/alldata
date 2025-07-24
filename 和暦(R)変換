@@ -1,0 +1,36 @@
+function get令和Date() {
+  //const today = new Date();
+  //const ja = { year: 'numeric', era: 'long', month: 'long', day: 'numeric',  weekday: 'long', hour: 'numeric', minute: ////'numeric', second: 'numeric' };
+  //const formattedDate = Utilities.formatDate(today, 'Asia/Tokyo', 'y.MM.d');
+  //let strSplit3 = formattedDate.substring(0,4);
+  //let reiw =strSplit3-2018
+  //let reiwa= "R"+ reiw
+  //console.log(reiwa);
+  //return formattedDate;
+
+  //SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName).activate();
+  let sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  // シート全体の範囲を取得
+  var range = sheet.getDataRange();
+  // 範囲内の全データを取得
+  var values = range.getDisplayValues();
+  
+  // 範囲内のセルを1つずつチェック
+  for (var i = 1; i < values.length; i++) {
+      let keywordx = sheet.getRange(i+1, 4).getDisplayValue()
+      let strSplit = keywordx.substring(0, 4);
+      let strSplit2 = keywordx.substring(5);
+      const formattedNumberSingleDigit = Utilities.formatString("%d", strSplit2)
+      let strSplit4 = strSplit-2018
+      let strSplit5 = "R" + strSplit4 + "."
+      let strSplit6 = strSplit5 + formattedNumberSingleDigit
+      
+      console.log(strSplit6);
+      if (strSplit != 'R7') 
+        // 指定された文字を含むセルの背景色を変更
+        sheet.getRange(i+1, 4).setValue(strSplit6)
+        else
+        break;
+      }
+      
+}
