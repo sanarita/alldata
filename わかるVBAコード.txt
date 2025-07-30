@@ -1,0 +1,5 @@
+Sub VBAコード()
+ 
+Shell "C:\Program Files (x86)\わかるくん\wakaru.exe", vbNormalFocus
+ 
+End Sub
