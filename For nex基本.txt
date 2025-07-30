@@ -1,0 +1,21 @@
+For nex基本
+VBA
+
+Sub test()
+
+
+Dim i As Long
+
+Dim MaxRow　as Long
+
+MaxRow = Sheets("Sheet1").Cells(Rows.Count, 1).End(xlUp).Row
+
+
+For i = 1 To MaxRow
+
+Cells(i, 1).Value = "A"
+
+Next i
+
+
+End Sub
